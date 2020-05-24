@@ -1,11 +1,16 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function Loading() {
+export default function Loading({params}) {
+    const str = () => {
+        return params.isLoading ? "Getting the weather" : (params.lat + ", " + params.lng);
+    };
+
+    console.log(params);
     return (
-    <View style={styles.container}>
-        <Text style={styles.text}>Getting weather</Text>
-    </View>
+        <View style={styles.container}>
+            <Text style={styles.text}>{str()}</Text>
+        </View>
     );
 };
 
