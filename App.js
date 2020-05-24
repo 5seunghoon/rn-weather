@@ -1,7 +1,12 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import Loading from './Loading';
-import AppMain from './AppMain';
+import {API_KEY} from './ApiKey';
 import * as Location from 'expo-location';
+import axios from "axios";
+
+function getCurrentWeatherUrl(lat, lng) {
+    return `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${API_KEY}`;
+}
 
 export default function App() {
     const [appState, setAppState] = useState({
@@ -10,26 +15,33 @@ export default function App() {
         lng: 0
     });
 
-    async function getLocation() {
+    async function getWeather() {
         const request = await Location.requestPermissionsAsync();
         if (!request.granted) {
             console.log("error for get permission");
             return null;
         }
-        return await Location.getCurrentPositionAsync({
+        const {
+            coords: {latitude, longitude}
+        } = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.High
         });
+
+        const url = getCurrentWeatherUrl(latitude, longitude);
+        console.log("url " + url);
+        const {data} = await axios.get(url);
+        console.log(data);
+
+        return data;
     }
 
     useEffect(() => {
         if (appState.isLoading) {
-            getLocation().then(r => {
-                console.log(r?.coords.longitude, r?.coords.latitude);
-                setAppState({
-                    isLoading: false,
-                    lat: r?.coords.longitude,
-                    lng: r?.coords.latitude,
-                });
+            const c = getWeather();
+            console.log(c);
+            setAppState({
+                isLoading: false,
+                weather: c
             });
         }
     });
